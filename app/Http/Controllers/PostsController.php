@@ -6,19 +6,20 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Posts\CreatePostsRequest;
 use App\Post;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\Posts\UpdatePostRequest;
 
-class PostsController extends Controller
-{
+class PostsController extends Controller {
+
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index() {
         //
         return view('posts.index')->with('posts', Post::all());
     }
+
     /**
      * Show the form for creating a new resource.
      *
@@ -46,7 +47,7 @@ class PostsController extends Controller
         
         Post::create([
             'title' => $request->title, 
-            'description' => $request->description,
+            'description' => $request->description, 
             'content' => $request->content, 
             'image' => $image,
             'published_at' => $request->published_at 
@@ -70,8 +71,7 @@ class PostsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
+    public function show($id) {
         //
     }
 
@@ -81,9 +81,8 @@ class PostsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        //
+    public function edit(Post $post) {
+        return view('posts.create')->with('post', $post);
     }
 
     /**
@@ -93,9 +92,35 @@ class PostsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
-        //
+    public function update(UpdatePostRequest $request, Post $post) {
+        
+
+        $data = $request->only(['title', 'description', 'published_at', 'content']); 
+
+
+        // check if new image 
+        if ($request -> hasFile('image')) { 
+            
+            //upload it 
+            $image = $request->image->store('posts'); 
+            
+            //delete old one 
+            Storage::delete($post->image); 
+            $data['image'] = $image;
+        }
+
+
+        //update attributes
+        $post->update($data); 
+
+
+
+        //flash msg
+        session()->flash('success', 'Post updated successfully'); 
+        //redirect
+        return redirect(route('posts.index'));
+
+        
     }
 
     /**
