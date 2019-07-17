@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\Posts\CreatePostsRequest;
 use App\Post;
 use App\Http\Requests\Posts\UpdatePostRequest;
+use App\Category;
 
 class PostsController extends Controller {
 
@@ -25,8 +26,9 @@ class PostsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function create() {
+        
 
-        return view('posts.create'); 
+        return view('posts.create')->with('categories', Category::all()); 
 
     }
 
@@ -49,7 +51,8 @@ class PostsController extends Controller {
             'description' => $request->description, 
             'content' => $request->content, 
             'image' => $image,
-            'published_at' => $request->published_at 
+            'published_at' => $request->published_at, 
+            'category_id' =>$request->category
         ]);
         
         
@@ -81,7 +84,7 @@ class PostsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit(Post $post) {
-        return view('posts.create')->with('post', $post);
+        return view('posts.create')->with('post', $post)->with('categories', Category::all());
     }
 
     /**
@@ -107,7 +110,8 @@ class PostsController extends Controller {
             $post->deleteImage(); 
             $data['image'] = $image;
         }
-
+        
+    
 
         //update attributes
         $post->update($data); 
@@ -164,6 +168,7 @@ class PostsController extends Controller {
         // withPosts($trashed) == with('posts', $trashed)
         return view('posts.index')->withPosts($trashed); 
     }
+    
 
 
     public function restore($id) { 
