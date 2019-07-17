@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\Posts\CreatePostsRequest;
 use App\Post;
+use Illuminate\Support\Facades\Storage;
 
 class PostsController extends Controller
 {
@@ -47,7 +48,8 @@ class PostsController extends Controller
             'title' => $request->title, 
             'description' => $request->description,
             'content' => $request->content, 
-            'image' => $image
+            'image' => $image,
+            'published_at' => $request->published_at 
         ]);
         
         
@@ -102,12 +104,39 @@ class PostsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Post $post) {
+    public function destroy($id) {
 
-        $post->delete(); 
+
+        // goes around route model binding, and finds the proper row in the DB
+        // can add equalities as a 3rd param to where
+        $post = Post::withTrashed()->where('id', $id)->firstOrFail();
+
+        if ($post->trashed()) {
+            $post->forceDelete();
+            Storage::delete($post->image);
+
+        }
+        else {
+            $post->delete();
+        }
 
         session()->flash('success', 'Post deleted successfully'); 
         return redirect(route('posts.index'));
         //
+    }
+
+
+    /**
+     * Display a list of all trashed posts
+     * @return \Illuminate\Http\Response
+     */
+
+    public function trashed () { 
+
+        $trashed = Post::withTrashed()->get(); 
+
+
+        // withPosts($trashed) == with('posts', $trashed)
+        return view('posts.index')->withPosts($trashed); 
     }
 }
