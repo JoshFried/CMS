@@ -7,6 +7,7 @@ use App\Http\Requests\Posts\CreatePostsRequest;
 use App\Post;
 use App\Http\Requests\Posts\UpdatePostRequest;
 use App\Category;
+use App\Tag;
 
 class PostsController extends Controller {
 
@@ -30,10 +31,7 @@ class PostsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function create() {
-        
-
-        return view('posts.create')->with('categories', Category::all()); 
-
+        return view('posts.create')->with('categories', Category::all())->with('tags', Tag::all()); 
     }
 
     /**
@@ -43,14 +41,10 @@ class PostsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function store(CreatePostsRequest $request) {
-        
         // 1st we upload img  
         $image = $request->image->store('posts'); 
-        
-        
         //create post 
-        
-        Post::create([
+        $post = Post::create([
             'title' => $request->title, 
             'description' => $request->description, 
             'content' => $request->content, 
@@ -59,16 +53,13 @@ class PostsController extends Controller {
             'category_id' =>$request->category
         ]);
         
-        
-        
+        If($request->tags) {
+            $post->tags()->attach($request->tags); 
+        }
         // flash msg 
             session()->flash('success', 'Post created successfully'); 
-
-
         // redirect user
         return redirect(route('posts.index'));
-
-
     }
 
     /**
@@ -88,7 +79,7 @@ class PostsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function edit(Post $post) {
-        return view('posts.create')->with('post', $post)->with('categories', Category::all());
+        return view('posts.create')->with('post', $post)->with('categories', Category::all())->with('tags', Tag::all());
     }
 
     /**
@@ -99,35 +90,25 @@ class PostsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function update(UpdatePostRequest $request, Post $post) {
-        
-
         $data = $request->only(['title', 'description', 'published_at', 'content']); 
-
-
         // check if new image 
         if ($request -> hasFile('image')) { 
-            
             //upload it 
             $image = $request->image->store('posts'); 
-            
             //delete old one 
             $post->deleteImage(); 
             $data['image'] = $image;
         }
-        
-    
-
+        if ($request->tags){
+            $post->tags()->sync($request->tags); 
+        }
         //update attributes
         $post->update($data); 
-
-
 
         //flash msg
         session()->flash('success', 'Post updated successfully'); 
         //redirect
         return redirect(route('posts.index'));
-
-        
     }
 
     /**
@@ -137,22 +118,17 @@ class PostsController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function destroy($id) {
-
-
         // goes around route model binding, and finds the proper row in the DB
         // can add equalities as a 3rd param to where
         $post = Post::withTrashed()->where('id', $id)->firstOrFail();
 
         if ($post->trashed()) {
-
             $post->deleteImage();
             $post->forceDelete();
-
         }
         else {
             $post->delete();
         }
-
         session()->flash('success', 'Post deleted successfully'); 
         return redirect(route('posts.index'));
         //
@@ -167,9 +143,6 @@ class PostsController extends Controller {
     public function trashed () { 
 
         $trashed = Post::onlyTrashed()->get(); 
-
-
-        // withPosts($trashed) == with('posts', $trashed)
         return view('posts.index')->withPosts($trashed); 
     }
     
@@ -181,4 +154,6 @@ class PostsController extends Controller {
         session()->flash('success', 'Post restored successfully'); 
         return redirect()->back(); 
     }
+
+
 }

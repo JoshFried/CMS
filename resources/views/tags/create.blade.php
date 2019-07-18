@@ -6,7 +6,7 @@
         {{ isset($tag) ? 'Edit tag' : 'Create tag'}}
     </div>
     <div class="card-body">
-        @include('partial.errors')
+        @include('partials.errors')
         <form action="{{isset($tag) ? route('tags.update', $tag->id) : route('tags.store') }}"
             method="POST">
             @csrf
