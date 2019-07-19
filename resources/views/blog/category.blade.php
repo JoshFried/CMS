@@ -1,7 +1,7 @@
 @extends('layouts.blog')
 
-@section('title')
-Saas Blog
+@section('title') 
+Category {{ $category->name }}
 @endsection
 
 @section('header')
@@ -13,7 +13,7 @@ Saas Blog
         <div class="row">
             <div class="col-md-8 mx-auto">
 
-                <h1>JoshCanCode</h1>
+                <h1>{{ $category->name }}</h1>
                 <p class="lead-2 opacity-90 mt-6">Read and get updated on how I progress</p>
 
             </div>
