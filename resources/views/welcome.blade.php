@@ -13,8 +13,8 @@ Saas Blog
         <div class="row">
             <div class="col-md-8 mx-auto">
 
-                <h1>Latest Blog Posts</h1>
-                <p class="lead-2 opacity-90 mt-6">Read and get updated on how we progress</p>
+                <h1>JoshCanCode</h1>
+                <p class="lead-2 opacity-90 mt-6">Read and get updated on how I progress</p>
 
             </div>
         </div>
@@ -56,10 +56,11 @@ Saas Blog
                                 </div>
         
         
-                                <nav class="flexbox mt-30">
+                                {{-- <nav class="flexbox mt-30">
                                     <a class="btn btn-white disabled"><i class="ti-arrow-left fs-9 mr-4"></i> Newer</a>
                                     <a class="btn btn-white" href="#">Older <i class="ti-arrow-right fs-9 ml-4"></i></a>
-                                </nav>
+                                </nav> --}}
+                                {{ $posts->links() }}
                             </div>
         
         
